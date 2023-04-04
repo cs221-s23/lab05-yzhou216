@@ -71,18 +71,61 @@ bool scan_is_digit(char c)
 
 char *scan_intlit(struct scan_token_st *tp, char *p, char *end)
 {
-	/* TODO: fill this in, like scan_read_token except just for integers */
+	tp->id = TK_INTLIT;
+
+	int i;
+	for (i = 0; p < end; i++) {
+		if (!scan_is_digit(*p))
+			break;
+		tp->name[i] = *p;
+		p++;
+	}
+	tp->name[i + 1] = '\0';
+
+	return p;
+}
+
+char *scan_binlit(struct scan_token_st *tp, char *p, char *end)
+{
+	tp->id = TK_BINLIT;
+
+	p+=2; /* 0b */
+	int i;
+	for (i = 0; p < end; i++) {
+		if (*p != '0' && *p != '1')
+			break;
+		tp->name[i] = *p;
+		p++;
+	}
+	tp->name[i + 1] = '\0';
+
+	return p;
+}
+
+bool scan_is_alpha(char c)
+{
+	return c >= 'a' && c <= 'f';
+}
+
+char *scan_hexlit(struct scan_token_st *tp, char *p, char *end)
+{
+	tp->id = TK_HEXLIT;
+
+	p+=2; /* 0x */
+	int i;
+	for (i = 0; p < end; i++) {
+		if (!scan_is_digit(*p) && !scan_is_alpha(*p))
+			break;
+		tp->name[i] = *p;
+		p++;
+	}
+	tp->name[i + 1] = '\0';
+
 	return p;
 }
 
 char *scan_token(struct scan_token_st *tp, char *p, char *end)
 {
-	/*
-	 * TODO:
-	 * add cases for binlit and hexlit
-	 * add cases for the other symbols
-	 */
-
 	if (p == end) {
 		p = scan_read_token(tp, p, 0, TK_EOT);
 	} else if (scan_is_whitespace(*p)) {
@@ -90,10 +133,29 @@ char *scan_token(struct scan_token_st *tp, char *p, char *end)
 		p = scan_whitespace(p, end);
 		/* recurse to get the next token */
 		p = scan_token(tp, p, end);
+	} else if (*p == '0') {
+		if (*(p + 1) == 'x')
+			p = scan_hexlit(tp, p, end);
+
+		if (*(p + 1) == 'b')
+			p = scan_binlit(tp, p, end);
 	} else if (scan_is_digit(*p)) {
 		p = scan_intlit(tp, p, end);
 	} else if (*p == '+') {
 		p = scan_read_token(tp, p, 1, TK_PLUS);
+	} else if (*p == '-') {
+		p = scan_read_token(tp, p, 1, TK_MINUS);
+	} else if (*p == '*') {
+		p = scan_read_token(tp, p, 1, TK_MULT);
+	} else if (*p == '/') {
+		p = scan_read_token(tp, p, 1, TK_DIV);
+	} else if (*p == '(') {
+		p = scan_read_token(tp, p, 1, TK_LPAREN);
+	} else if (*p == ')') {
+		p = scan_read_token(tp, p, 1, TK_RPAREN);
+	} else {
+		printf("unexpected tocken: %c\n", *p);
+		exit(-1);
 	}
 	return p;
 }
