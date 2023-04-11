@@ -139,7 +139,7 @@ char *scan_token(struct scan_token_st *tp, char *p, char *end)
 		} else if (*(p + 1) == 'b') {
 			p = scan_binlit(tp, p, end);
 		} else {
-			printf("unexpected tocken: %c\n", *(p + 1));
+			printf("unexpected token: %c\n", *(p + 1));
 			exit(-1);
 		}
 	} else if (scan_is_digit(*p)) {
@@ -157,7 +157,7 @@ char *scan_token(struct scan_token_st *tp, char *p, char *end)
 	} else if (*p == ')') {
 		p = scan_read_token(tp, p, 1, TK_RPAREN);
 	} else {
-		printf("unexpected tocken: %c\n", *p);
+		printf("unexpected token: %c\n", *p);
 		exit(-1);
 	}
 	return p;
