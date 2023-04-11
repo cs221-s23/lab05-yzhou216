@@ -134,11 +134,14 @@ char *scan_token(struct scan_token_st *tp, char *p, char *end)
 		/* recurse to get the next token */
 		p = scan_token(tp, p, end);
 	} else if (*p == '0') {
-		if (*(p + 1) == 'x')
+		if (*(p + 1) == 'x') {
 			p = scan_hexlit(tp, p, end);
-
-		if (*(p + 1) == 'b')
+		} else if (*(p + 1) == 'b') {
 			p = scan_binlit(tp, p, end);
+		} else {
+			printf("unexpected tocken: %c\n", *(p + 1));
+			exit(-1);
+		}
 	} else if (scan_is_digit(*p)) {
 		p = scan_intlit(tp, p, end);
 	} else if (*p == '+') {
